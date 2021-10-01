@@ -1,35 +1,30 @@
 import os
 import telebot
-from telebot import types
 from dotenv import load_dotenv
+from botrequests import lowprice
 
+
+MAX_PHOTOS = 5
+MAX_HOTELS = 10
 
 load_dotenv()
-
 TOKEN = os.getenv('TOKEN')
-
 bot = telebot.TeleBot(TOKEN)
 
-name = ''
-surname = ''
-age = 0
-
-
-@bot.callback_query_handler(func=lambda call: True)
-def callback_worker(call):
-    if call.data == "yes":
-        bot.send_message(call.message.chat.id, 'Запомню : )')
+city = ''
+number_of_hotels = 0
+need_to_return_photos = False
+command = ''
 
 
 @bot.message_handler(content_types=['text'])
 def start(message):
-    if message.text.lower() == "привет":
-        bot.send_message(message.from_user.id, "Привет, чем я могу тебе помочь?")
-    elif message.text == '/reg':
-        bot.send_message(message.from_user.id, "Как тебя зовут?")
-        bot.register_next_step_handler(message, get_name)
+    global command
+    if message.text == '/lowprice':
+        bot.send_message(message.from_user.id, "В каком городе будет производиться поиск?")
+        bot.register_next_step_handler(message, get_city)
     else:
-        bot.send_message(message.from_user.id, "Я тебя не понимаю, введи команду /help")
+        bot.send_message(message.from_user.id, "Привет, чтобы получить информацию о командах, введи команду /help")
         bot.register_next_step_handler(message, help_func)
 
 
@@ -38,42 +33,46 @@ def help_func(message):
         bot.send_message(message.from_user.id, "Это функция-помощник, но она сейчас недоступна")
 
 
-def get_name(message):
-    global name
-    name = message.text
-    bot.send_message(message.from_user.id, "Какая у тебя фамилия?")
-    bot.register_next_step_handler(message, get_surname)
+def get_city(message):
+    global city
+    city = message.text
+    bot.send_message(message.from_user.id, "Какое количество отелей будем искать (максимум - {})?".format(
+        MAX_HOTELS
+    ))
+    bot.register_next_step_handler(message, get_number_of_hotels)
 
 
-def get_surname(message):
-    global surname
-    surname = message.text
-    bot.send_message(message.from_user.id, "Сколько тебе лет?")
-    bot.register_next_step_handler(message, get_age)
+def get_number_of_hotels(message):
+    global number_of_hotels
+    number_of_hotels = int(message.text)
+    bot.send_message(message.from_user.id, "Нужно ли выводить фотографии отеля?")
+    bot.register_next_step_handler(message, need_to_return_photos_func)
 
 
-def get_age(message):
-    global age
-    while age == 0:
-        try:
-            age = int(message.text)
-        except Exception:
-            bot.send_message(message.from_user.id, "Цифрами, пожалуйста")
+def need_to_return_photos_func(message):
+    global need_to_return_photos
+    if message.text.lower() == 'да':
+        need_to_return_photos = True
+    elif message.text.lower == 'нет':
+        need_to_return_photos = False
+    bot.register_next_step_handler(message, lowprice_func)
 
-    keyboard = types.InlineKeyboardMarkup()
 
-    key_yes = types.InlineKeyboardButton(text='Да', callback_data='yes')
-    keyboard.add(key_yes)
-    key_no = types.InlineKeyboardButton(text='Нет', callback_data='no')
-    keyboard.add(key_no)
-
-    question = "Тебе {} лет и тебя зовут {} {}?".format(
-        age,
-        name,
-        surname
-    )
-
-    bot.send_message(message.from_user.id, text=question, reply_markup=keyboard)
-
+def lowprice_func(message):
+    result_of_search = lowprice.main(city, number_of_hotels, need_to_return_photos)
+    for hotel in result_of_search:
+        message = "Название отеля: {}\n" \
+                  "Адрес отеля: {}\n" \
+                  "Удаленность от центра: {}\n" \
+                  "Цена: {}\n" \
+                  "Ссылки на фотографии отеля: {}".format(
+                    hotel["hotel_name"],
+                    hotel["address"],
+                    hotel["distance_to_center"],
+                    hotel["price"],
+                    hotel["hotel_photos"]
+                    )
+        bot.send_message(message.from_user.id, message)
+        
 
 bot.polling(none_stop=True, interval=0)
