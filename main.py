@@ -11,15 +11,9 @@ load_dotenv()
 TOKEN = os.getenv('TOKEN')
 bot = telebot.TeleBot(TOKEN)
 
-city = ''
-number_of_hotels = 0
-need_to_return_photos = False
-command = ''
-
 
 @bot.message_handler(content_types=['text'])
 def start(message):
-    global command
     if message.text == '/lowprice':
         bot.send_message(message.from_user.id, "В каком городе будет производиться поиск?")
         bot.register_next_step_handler(message, get_city)
@@ -34,8 +28,8 @@ def help_func(message):
 
 
 def get_city(message):
-    global city
-    city = message.text
+    with open("info_from_user.txt", 'a', encoding='UTF-8') as f:
+        f.write('1) {}'.format('{}\n'.format(message.text)))
     bot.send_message(message.from_user.id, "Какое количество отелей будем искать (максимум - {})?".format(
         MAX_HOTELS
     ))
@@ -43,23 +37,34 @@ def get_city(message):
 
 
 def get_number_of_hotels(message):
-    global number_of_hotels
-    number_of_hotels = int(message.text)
+    with open("info_from_user.txt", 'a', encoding='UTF-8') as f:
+        f.write('2) {}'.format('{}\n'.format(message.text)))
     bot.send_message(message.from_user.id, "Нужно ли выводить фотографии отеля?")
     bot.register_next_step_handler(message, need_to_return_photos_func)
 
 
 def need_to_return_photos_func(message):
-    global need_to_return_photos
     if message.text.lower() == 'да':
-        need_to_return_photos = True
+        with open("info_from_user.txt", 'a', encoding='UTF-8') as f:
+            f.write('3) {}'.format('{}\n'.format(True)))
     elif message.text.lower == 'нет':
-        need_to_return_photos = False
+        with open("info_from_user.txt", 'a', encoding='UTF-8') as f:
+            f.write('3) {}'.format('{}\n'.format(False)))
     bot.register_next_step_handler(message, lowprice_func)
 
 
 def lowprice_func(message):
+    with open("info_from_user.txt", 'r', encoding='UTT-8') as f:
+        lines = f.readlines()
+        city = lines[0][3:].strip('\n')
+        number_of_hotels = int(lines[1][3:].strip('\n'))
+        need_to_return_photos = bool(lines[2][3:].strip('\n'))
+
+    path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'info_from_user.txt')
+    os.remove(path)
+
     result_of_search = lowprice.main(city, number_of_hotels, need_to_return_photos)
+
     for hotel in result_of_search:
         message = "Название отеля: {}\n" \
                   "Адрес отеля: {}\n" \
@@ -72,7 +77,8 @@ def lowprice_func(message):
                     hotel["price"],
                     hotel["hotel_photos"]
                     )
-        bot.send_message(message.from_user.id, message)
+
+    bot.send_message(message.from_user.id, message)
         
 
 bot.polling(none_stop=True, interval=0)
