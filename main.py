@@ -47,14 +47,14 @@ def need_to_return_photos_func(message):
     if message.text.lower() == 'да':
         with open("info_from_user.txt", 'a', encoding='UTF-8') as f:
             f.write('3) {}'.format('{}\n'.format(True)))
-    elif message.text.lower == 'нет':
+    elif message.text.lower() == 'нет':
         with open("info_from_user.txt", 'a', encoding='UTF-8') as f:
             f.write('3) {}'.format('{}\n'.format(False)))
     bot.register_next_step_handler(message, lowprice_func)
 
 
 def lowprice_func(message):
-    with open("info_from_user.txt", 'r', encoding='UTT-8') as f:
+    with open("info_from_user.txt", 'r', encoding='UTF-8') as f:
         lines = f.readlines()
         city = lines[0][3:].strip('\n')
         number_of_hotels = int(lines[1][3:].strip('\n'))
