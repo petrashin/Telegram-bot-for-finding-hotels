@@ -88,6 +88,3 @@ def main(city_name, number_of_hotels, need_to_return_photos):
         return get_all_info(destination_id, number_of_hotels, 5)
     else:
         return get_all_info(destination_id, number_of_hotels)
-
-
-print(main('new york', 1, False))
