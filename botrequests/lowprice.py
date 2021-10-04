@@ -1,10 +1,12 @@
+import os
 import requests
 import json
 
+x_rapidapi_key = os.getenv('x-rapidapi-key')
 
 headers = {
     'x-rapidapi-host': "hotels4.p.rapidapi.com",
-    'x-rapidapi-key': "906dbecd20mshf2105597c6f679bp13507bjsnf1ccbed26cbc"
+    'x-rapidapi-key': x_rapidapi_key
     }
 
 
