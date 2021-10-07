@@ -1,8 +1,9 @@
-import os
 import requests
 import json
+from decouple import config
 
-x_rapidapi_key = os.getenv('x-rapidapi-key')
+
+x_rapidapi_key = config('x_rapidapi_key')
 
 headers = {
     'x-rapidapi-host': "hotels4.p.rapidapi.com",
