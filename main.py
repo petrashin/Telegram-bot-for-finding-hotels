@@ -2,13 +2,8 @@ import os
 import telebot
 from dotenv import load_dotenv
 from botrequests import lowprice
-import sqlite3
+import databasefile
 
-
-conn = sqlite3.connect("history.db")
-cursor = conn.cursor()
-cursor.execute("""CREATE TABLE history
-                  (user_id text, command text,  city text, number_of_hotels text, need_photos text)""")
 
 MAX_PHOTOS = 5
 MAX_HOTELS = 5
@@ -16,6 +11,8 @@ MAX_HOTELS = 5
 load_dotenv()
 TOKEN = os.getenv('TOKEN')
 bot = telebot.TeleBot(TOKEN)
+
+databasefile.create_table_of_data_base("history.db")
 
 
 @bot.message_handler(content_types=['text'])
@@ -54,33 +51,14 @@ def get_number_of_hotels(message, user_id, command, city):
 
 def need_to_return_photos_func(message, user_id, command, city, number_of_hotels):
     if message.text.lower() == 'да':
-        cursor.execute("""INSERT INTO history
-                          VALUES ('{}', '{}', '{}', '{}', '{}') """.format(
-            command,
-            user_id,
-            city,
-            number_of_hotels,
-            True
-        ))
-        conn.commit()
+        databasefile.create_registration("history.db", user_id, command, city, number_of_hotels, True)
     elif message.text.lower() == 'нет':
-        cursor.execute("""INSERT INTO history
-                          VALUES ('{}', '{}', '{}', '{}', '{}') """.format(
-            command,
-            user_id,
-            city,
-            number_of_hotels,
-            False
-        ))
-        conn.commit()
+        databasefile.create_registration("history.db", user_id, command, city, number_of_hotels, False)
     bot.register_next_step_handler(message, lowprice_func)
 
 
 def lowprice_func(message):
-    sql = "SELECT city, number_of_hotels, need_photos FROM history"
-    cursor.execute(sql)
-    city, number_of_hotels, need_to_return_photos = list(*cursor.fetchall())
-
+    city, number_of_hotels, need_to_return_photos = databasefile.get_info_from_data_base("history.db")
     result_of_search = lowprice.main(city, number_of_hotels, need_to_return_photos)
 
     for hotel in result_of_search:
