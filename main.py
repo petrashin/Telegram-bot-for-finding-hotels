@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from botrequests import lowprice, highprice
 
 MAX_HOTELS = 5
+MAX_PHOTOS = 5
 
 load_dotenv()
 TOKEN = os.getenv('TOKEN')
@@ -74,26 +75,50 @@ def need_to_return_photos_func(message, user_id, command, city, number_of_hotels
     else:
         need_to_return_photos = True
 
-    if command == '/lowprice':
-        result_of_search = lowprice.main(city, number_of_hotels, need_to_return_photos)
-    elif command == '/highprice':
-        result_of_search = highprice.main(city, number_of_hotels, need_to_return_photos)
-    else:
-        result_of_search = {}
+    bot.send_message(user_id, "Какое количество фотографий будем выводить (максимум - {})?".format(
+        MAX_PHOTOS
+    ))
+    bot.register_next_step_handler(message,
+                                   get_number_of_photos,
+                                   user_id,
+                                   command,
+                                   city,
+                                   number_of_hotels,
+                                   need_to_return_photos)
 
-    for hotel in result_of_search:
-        message = "Название отеля: {}\n" \
-                  "Адрес отеля: {}\n" \
-                  "Удаленность от центра: {}\n" \
-                  "Цена: {}\n".format(
-                hotel["hotel_name"],
-                hotel["address"],
-                hotel["distance_to_center"],
-                hotel["price"],
-            )
-        bot.send_message(user_id, message)
-        for photo in hotel["hotel_photos"]:
-            bot.send_photo(user_id, photo)
+
+def get_number_of_photos(message, user_id, command, city, number_of_hotels, need_to_return_photos):
+    number_of_photos = int(message.text)
+    if 1 <= number_of_photos <= MAX_PHOTOS:
+        if command == '/lowprice':
+            result_of_search = lowprice.main(city, number_of_hotels, need_to_return_photos, number_of_photos)
+        elif command == '/highprice':
+            result_of_search = highprice.main(city, number_of_hotels, need_to_return_photos, number_of_photos)
+        else:
+            result_of_search = {}
+
+        for hotel in result_of_search:
+            message = "Название отеля: {}\n" \
+                      "Адрес отеля: {}\n" \
+                      "Удаленность от центра: {}\n" \
+                      "Цена: {}\n".format(
+                    hotel["hotel_name"],
+                    hotel["address"],
+                    hotel["distance_to_center"],
+                    hotel["price"],
+                )
+            bot.send_message(user_id, message)
+            for photo in hotel["hotel_photos"]:
+                bot.send_photo(user_id, photo)
+    else:
+        bot.send_message(user_id, "Вы ввели неправильное количество фотографий, попробуйте снова")
+        bot.register_next_step_handler(message,
+                                       get_number_of_photos,
+                                       user_id,
+                                       command,
+                                       city,
+                                       number_of_hotels,
+                                       need_to_return_photos)
 
 
 bot.polling(none_stop=True, interval=0)

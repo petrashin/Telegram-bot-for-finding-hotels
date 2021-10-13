@@ -2,9 +2,6 @@ import requests
 import json
 from decouple import config
 
-#
-
-MAX_PHOTOS = 5
 
 x_rapidapi_key = config('x_rapidapi_key')
 
@@ -86,9 +83,9 @@ def get_all_info(dest_id, number_of_hotels, number_of_photos=0):
     return result
 
 
-def main(city_name, number_of_hotels, need_to_return_photos):
+def main(city_name, number_of_hotels, need_to_return_photos, number_of_photos):
     destination_id = get_destination_id(city_name)
     if need_to_return_photos:
-        return get_all_info(destination_id, number_of_hotels, MAX_PHOTOS)
+        return get_all_info(destination_id, number_of_hotels, number_of_photos)
     else:
         return get_all_info(destination_id, number_of_hotels)
