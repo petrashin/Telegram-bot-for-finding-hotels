@@ -2,6 +2,8 @@ import requests
 import json
 from decouple import config
 
+#
+
 MAX_PHOTOS = 5
 
 x_rapidapi_key = config('x_rapidapi_key')
