@@ -56,7 +56,7 @@ def get_all_info(dest_id, number_of_hotels, number_of_photos=0):
                    "checkIn": "2020-01-08",
                    "checkOut": "2020-01-15",
                    "adults1": "1",
-                   "sortOrder": "PRICE",
+                   "sortOrder": "PRICE_HIGHEST_FIRST",
                    "locale": "en_US",
                    "currency": "USD"
                    }
