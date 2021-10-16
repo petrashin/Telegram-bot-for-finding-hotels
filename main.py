@@ -1,7 +1,7 @@
 import os
 import telebot
 from dotenv import load_dotenv
-from botrequests import lowprice, highprice, bestdeal
+from botrequests import lowprice, highprice, bestdeal, history
 
 MAX_HOTELS = 5
 MAX_PHOTOS = 5
@@ -9,6 +9,9 @@ MAX_PHOTOS = 5
 load_dotenv()
 TOKEN = os.getenv('TOKEN')
 bot = telebot.TeleBot(TOKEN)
+
+
+history.create()
 
 
 @bot.message_handler(content_types=['text'])
@@ -22,21 +25,36 @@ def start(message):
                                        user_id,
                                        command)
     elif command == '/help':
-        bot.register_next_step_handler(user_id,
+        bot.register_next_step_handler(message,
                                        help_func)
+    elif command == '/history':
+        bot.register_next_step_handler(message,
+                                       get_history,
+                                       user_id)
     else:
         bot.send_message(user_id, "Привет, чтобы получить информацию о командах, введи команду /help")
         bot.register_next_step_handler(message,
                                        help_func)
 
 
+def get_history(message):
+    user_id = message.from_user.id
+    result = history.get_info()
+    new_message = ''
+    for line in result:
+        new_message += "Использованная команда: {},\nДата и время использования: {},\nРезультат поиска: {}".format(
+                line[0], line[1], line[2]
+            ) + '\n\n'
+    bot.send_message(user_id, new_message)
+
+
 def help_func(message):
-    bot.send_message(message.from_user.id, """
-    Команды для поиска отелей:
-    /lowprice - Узнать топ самых дешёвых отелей в городе
-    /highprice - Узнать топ самых дорогих отелей в городе
-    /bestdeal - Узнать топ отелей, наиболее подходящих по цене и расположению от центра
-    """)
+    user_id = message.from_user.id
+    bot.send_message(user_id, "Команды для поиска отелей:\n"
+                              "/lowprice - Узнать топ самых дешёвых отелей в городе\n"
+                              "/highprice - Узнать топ самых дорогих отелей в городе\n"
+                              "/bestdeal - Узнать топ отелей, наиболее подходящих по цене и расположению от центра\n"
+                              "/history - Узнать историю поиска отелей")
 
 
 def get_city(message, user_id, command):
@@ -191,7 +209,10 @@ def get_number_of_photos(message,
         else:
             result_of_search = {}
 
+        hotels_found = []
+
         for hotel in result_of_search:
+            hotels_found.append(hotel["hotel_name"])
             message = "Название отеля: {}\n" \
                       "Адрес отеля: {}\n" \
                       "Удаленность от центра: {}\n" \
@@ -204,6 +225,9 @@ def get_number_of_photos(message,
             bot.send_message(user_id, message)
             for photo in hotel["hotel_photos"]:
                 bot.send_photo(user_id, photo)
+
+        history.make_note(command, ', '.join(hotels_found))
+
     else:
         bot.send_message(user_id, "Вы ввели неправильное количество фотографий, попробуйте снова")
         bot.register_next_step_handler(message,
