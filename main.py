@@ -15,7 +15,7 @@ history.create()
 
 
 @bot.message_handler(content_types=['text'])
-def start(message):
+def start(message) -> None:
     command = message.text
     user_id = message.from_user.id
     if command == '/lowprice' or command == '/highprice' or command == '/bestdeal':
@@ -36,7 +36,7 @@ def start(message):
                                        help_func)
 
 
-def get_history(message):
+def get_history(message) -> None:
     user_id = message.from_user.id
     result = history.get_info(user_id)
     new_message = ''
@@ -47,7 +47,7 @@ def get_history(message):
     bot.send_message(user_id, new_message)
 
 
-def help_func(message):
+def help_func(message) -> None:
     user_id = message.from_user.id
     bot.send_message(user_id, "Команды для поиска отелей:\n"
                               "/lowprice - Узнать топ самых дешёвых отелей в городе\n"
@@ -56,7 +56,7 @@ def help_func(message):
                               "/history - Узнать историю поиска отелей")
 
 
-def get_city(message, user_id, command):
+def get_city(message, user_id: str, command: str) -> None:
     city = message.text
     if command == '/lowprice' or command == '/highprice':
         bot.send_message(user_id, "Какое количество отелей будем искать (максимум - {})?".format(
@@ -76,7 +76,7 @@ def get_city(message, user_id, command):
                                        city)
 
 
-def get_min_price(message, user_id, command, city):
+def get_min_price(message, user_id: str, command: str, city: str) -> None:
     min_price = float(message.text)
     bot.send_message(user_id, "Какова должна быть максимальная цена отеля в $?")
     bot.register_next_step_handler(message,
@@ -87,7 +87,7 @@ def get_min_price(message, user_id, command, city):
                                    min_price)
 
 
-def get_max_price(message, user_id, command, city, min_price):
+def get_max_price(message, user_id: str, command: str, city: str, min_price: float) -> None:
     max_price = float(message.text)
     bot.send_message(user_id, "На каком наибольшем расстоянии от центра должен находиться отель в милях?")
     bot.register_next_step_handler(message,
@@ -99,7 +99,7 @@ def get_max_price(message, user_id, command, city, min_price):
                                    max_price)
 
 
-def get_distance(message, user_id, command, city, min_price, max_price):
+def get_distance(message, user_id: str, command: str, city: str, min_price: float, max_price: float):
     max_distance = float(message.text)
     bot.send_message(user_id, "Какое количество отелей будем искать (максимум - {})?".format(
         MAX_HOTELS
@@ -115,12 +115,12 @@ def get_distance(message, user_id, command, city, min_price, max_price):
 
 
 def get_number_of_hotels(message,
-                         user_id,
-                         command,
-                         city,
-                         min_price=None,
-                         max_price=None,
-                         max_distance=None):
+                         user_id: str,
+                         command: str,
+                         city: str,
+                         min_price: float = None,
+                         max_price: float = None,
+                         max_distance: float = None):
 
     number_of_hotels = int(message.text)
     if 1 <= number_of_hotels <= MAX_HOTELS:
@@ -147,13 +147,13 @@ def get_number_of_hotels(message,
 
 
 def need_to_return_photos_func(message,
-                               user_id,
-                               command,
-                               city,
-                               number_of_hotels,
-                               min_price=None,
-                               max_price=None,
-                               max_distance=None):
+                               user_id: str,
+                               command: str,
+                               city: str,
+                               number_of_hotels: int,
+                               min_price: float = None,
+                               max_price: float = None,
+                               max_distance: float = None):
 
     if message.text.lower() == 'да':
         need_to_return_photos = True
@@ -176,14 +176,14 @@ def need_to_return_photos_func(message,
 
 
 def get_number_of_photos(message,
-                         user_id,
-                         command,
-                         city,
-                         number_of_hotels,
-                         need_to_return_photos,
-                         min_price=None,
-                         max_price=None,
-                         max_distance=None):
+                         user_id: str,
+                         command: str,
+                         city: str,
+                         number_of_hotels: int,
+                         need_to_return_photos: bool,
+                         min_price: float = None,
+                         max_price: float = None,
+                         max_distance: float = None):
 
     number_of_photos = int(message.text)
     if 1 <= number_of_photos <= MAX_PHOTOS:

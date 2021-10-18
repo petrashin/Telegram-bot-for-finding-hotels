@@ -1,6 +1,7 @@
 import requests
 import json
 from decouple import config
+from typing import List, Dict
 
 x_rapidapi_key = config('x_rapidapi_key')
 
@@ -10,7 +11,7 @@ headers = {
     }
 
 
-def get_destination_id(name_of_place):
+def get_destination_id(name_of_place: str) -> str:
     """
     Функция возвращающая destinationId города,
     название которого передано в данную функцию в качестве строки
@@ -22,7 +23,7 @@ def get_destination_id(name_of_place):
     return data["suggestions"][0]["entities"][0]["destinationId"]
 
 
-def get_urls_of_photos(hotel_id, number_of_photos):
+def get_urls_of_photos(hotel_id: str, number_of_photos: int) -> List[str]:
     """
     Функция, принимающая hotel_id и number_of_photos
     и возвращающая список url фотографий заданного отеля
@@ -39,7 +40,12 @@ def get_urls_of_photos(hotel_id, number_of_photos):
     return list_of_photos
 
 
-def get_all_info(dest_id, number_of_hotels, min_price, max_price, max_distance, number_of_photos=0):
+def get_all_info(dest_id: str,
+                 number_of_hotels: int,
+                 min_price: float,
+                 max_price: float,
+                 max_distance: float,
+                 number_of_photos: int = 0) -> List[Dict[str, str]]:
     """
     Функция, принимающая dest_id, number_of_hotels и необязательный параметр number_of_photos.
     Возвращает список словарей, в котором хранится информация о каждом из отелей
@@ -96,13 +102,13 @@ def get_all_info(dest_id, number_of_hotels, min_price, max_price, max_distance, 
     return result
 
 
-def main(city_name,
-         min_price,
-         max_price,
-         max_distance,
-         number_of_hotels,
-         need_to_return_photos,
-         number_of_photos):
+def main(city_name: str,
+         min_price: float,
+         max_price: float,
+         max_distance: float,
+         number_of_hotels: int,
+         need_to_return_photos: bool,
+         number_of_photos: int) -> List[Dict[str, str]]:
     destination_id = get_destination_id(city_name)
     if need_to_return_photos:
         return get_all_info(destination_id,
