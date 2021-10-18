@@ -6,14 +6,15 @@ def create():
     conn = sqlite3.connect("mydatabase.db", uri=True)
     cursor = conn.cursor()
     cursor.execute("""CREATE table IF NOT EXISTS history
-                      (command text, info_about_date text, search_result text);""")
+                      (user_id text, command text, info_about_date text, search_result text);""")
 
 
-def make_note(command, data):
+def make_note(user_id, command, data):
     conn = sqlite3.connect("mydatabase.db", uri=True)
     cursor = conn.cursor()
     cursor.execute("""INSERT INTO history
-                      VALUES ('{}', '{}', '{}')""".format(
+                      VALUES ('{}', '{}', '{}', '{}')""".format(
+        user_id,
         command,
         str(datetime.now())[:-7],
         data
@@ -21,10 +22,10 @@ def make_note(command, data):
     conn.commit()
 
 
-def get_info():
+def get_info(user_id):
     conn = sqlite3.connect("mydatabase.db", uri=True)
     cursor = conn.cursor()
-    sql = "SELECT * FROM history"
+    sql = "SELECT command, info_about_date, search_result FROM history WHERE user_id='{}'".format(user_id)
     cursor.execute(sql)
 
     return cursor.fetchall()

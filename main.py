@@ -29,8 +29,7 @@ def start(message):
                                        help_func)
     elif command == '/history':
         bot.register_next_step_handler(message,
-                                       get_history,
-                                       user_id)
+                                       get_history)
     else:
         bot.send_message(user_id, "Привет, чтобы получить информацию о командах, введи команду /help")
         bot.register_next_step_handler(message,
@@ -39,7 +38,7 @@ def start(message):
 
 def get_history(message):
     user_id = message.from_user.id
-    result = history.get_info()
+    result = history.get_info(user_id)
     new_message = ''
     for line in result:
         new_message += "Использованная команда: {},\nДата и время использования: {},\nРезультат поиска: {}".format(
@@ -226,7 +225,7 @@ def get_number_of_photos(message,
             for photo in hotel["hotel_photos"]:
                 bot.send_photo(user_id, photo)
 
-        history.make_note(command, ', '.join(hotels_found))
+        history.make_note(user_id, command, ', '.join(hotels_found))
 
     else:
         bot.send_message(user_id, "Вы ввели неправильное количество фотографий, попробуйте снова")
