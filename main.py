@@ -15,7 +15,7 @@ history.create()
 
 
 @bot.message_handler(content_types=['text'])
-def start(message) -> None:
+def start(message: telebot.types.Message) -> None:
     command = message.text
     user_id = message.from_user.id
     if command == '/lowprice' or command == '/highprice' or command == '/bestdeal':
@@ -36,8 +36,8 @@ def start(message) -> None:
                                        help_func)
 
 
-def get_history(message) -> None:
-    user_id = message.from_user.id
+def get_history(message: telebot.types.Message) -> None:
+    user_id = str(message.from_user.id)
     result = history.get_info(user_id)
     new_message = ''
     for line in result:
@@ -47,7 +47,7 @@ def get_history(message) -> None:
     bot.send_message(user_id, new_message)
 
 
-def help_func(message) -> None:
+def help_func(message: telebot.types.Message) -> None:
     user_id = message.from_user.id
     bot.send_message(user_id, "Команды для поиска отелей:\n"
                               "/lowprice - Узнать топ самых дешёвых отелей в городе\n"
@@ -56,7 +56,7 @@ def help_func(message) -> None:
                               "/history - Узнать историю поиска отелей")
 
 
-def get_city(message, user_id: str, command: str) -> None:
+def get_city(message: telebot.types.Message, user_id: str, command: str) -> None:
     city = message.text
     if command == '/lowprice' or command == '/highprice':
         bot.send_message(user_id, "Какое количество отелей будем искать (максимум - {})?".format(
@@ -76,7 +76,7 @@ def get_city(message, user_id: str, command: str) -> None:
                                        city)
 
 
-def get_min_price(message, user_id: str, command: str, city: str) -> None:
+def get_min_price(message: telebot.types.Message, user_id: str, command: str, city: str) -> None:
     min_price = float(message.text)
     bot.send_message(user_id, "Какова должна быть максимальная цена отеля в $?")
     bot.register_next_step_handler(message,
@@ -87,7 +87,7 @@ def get_min_price(message, user_id: str, command: str, city: str) -> None:
                                    min_price)
 
 
-def get_max_price(message, user_id: str, command: str, city: str, min_price: float) -> None:
+def get_max_price(message: telebot.types.Message, user_id: str, command: str, city: str, min_price: float) -> None:
     max_price = float(message.text)
     bot.send_message(user_id, "На каком наибольшем расстоянии от центра должен находиться отель в милях?")
     bot.register_next_step_handler(message,
@@ -99,7 +99,12 @@ def get_max_price(message, user_id: str, command: str, city: str, min_price: flo
                                    max_price)
 
 
-def get_distance(message, user_id: str, command: str, city: str, min_price: float, max_price: float):
+def get_distance(message: telebot.types.Message,
+                 user_id: str,
+                 command: str,
+                 city: str,
+                 min_price: float,
+                 max_price: float):
     max_distance = float(message.text)
     bot.send_message(user_id, "Какое количество отелей будем искать (максимум - {})?".format(
         MAX_HOTELS
@@ -114,7 +119,7 @@ def get_distance(message, user_id: str, command: str, city: str, min_price: floa
                                    max_distance)
 
 
-def get_number_of_hotels(message,
+def get_number_of_hotels(message: telebot.types.Message,
                          user_id: str,
                          command: str,
                          city: str,
@@ -146,7 +151,7 @@ def get_number_of_hotels(message,
                                        max_distance)
 
 
-def need_to_return_photos_func(message,
+def need_to_return_photos_func(message: telebot.types.Message,
                                user_id: str,
                                command: str,
                                city: str,
@@ -175,7 +180,7 @@ def need_to_return_photos_func(message,
                                    max_distance)
 
 
-def get_number_of_photos(message,
+def get_number_of_photos(message: telebot.types.Message,
                          user_id: str,
                          command: str,
                          city: str,
